@@ -94,7 +94,7 @@ class CKY:
                     for A in self.nonTerminals:
                         for B in self.nonTerminals:
                             for C in self.nonTerminals:
-                                prob = self.pi[begin][split][B]*self.pi[split][end-1][C]*self.AGoesToBCInGrammar(A,B,C)
+                                prob = self.pi[begin][split][B]*self.pi[split][end][C]*self.AGoesToBCInGrammar(A,B,C)
                                 self.addIfNull(begin,end,A)
                                 if prob > self.pi[begin][end][A]:
                                     self.pi[begin][end][A]=prob
@@ -175,9 +175,15 @@ class CKY:
 
 def main():
     s=['fish','people','fish','tanks']
-    nonTerms=['S','VP','V','NP','PP','DT','@VP_V','N','P']
+    nonTerms=['S','NP','VP','V@VP_V','V','PP','@VP_V','N','P']
 
-    rules=[['S','VP',0.1],['VP','V','NP',0.5],['VP','V',0.1],['VP','V','@VP_V',0.3],
+
+    rules=[['S','NP','VP',0.1],
+           ['S','VP',0.1],
+           ['VP','V','NP',0.5],
+           ['VP','V',0.1],
+           ['VP','V@VP_V',0.3],
+
            ['VP','V','PP',0.1],
            ['@VP_V','NP','PP',1.0],
            ['NP','NP','NP',0.1],
@@ -192,6 +198,8 @@ def main():
            ['V','fish',0.6],
            ['V','tanks',0.3],
            ['P','with',1.0]]
+
+
 
     cky = CKY(s,5,nonTerms,rules)
     #print cky.AGoesToBCInGrammar('VP','V','PP')
