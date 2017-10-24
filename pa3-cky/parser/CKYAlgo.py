@@ -10,8 +10,6 @@ class CKY:
         a, b, c = len(self.s)+1, len(self.s)+1, n1;
         self.pi=dict(dict(dict()))
         self.bp=dict(dict(dict()))
-        #self.pi = [[[[0 for z in range(c)] for x in range(b)] for y in range(a)]]
-        #self.bp = [[[[None for z in range(c)] for x in range(b)] for y in range(a)]]
         self.nonTerminals=nonTerms
         self.rules=dict()
         self.setRulesDict(rules)
@@ -38,11 +36,7 @@ class CKY:
     def setup(self):
         for i in range(0,len(self.s)):
             for X in self.nonTerminals:
-                if i not in self.pi:
-                    self.pi[i]=dict()
-                if i not in self.pi[i]:
-                    self.pi[i][i]=dict()
-
+                self.addIfNull(i,i,X)
                 p=self.AGoesToBInGrammar(X,self.s[i])
                 if p>=0:
                     self.pi[i][i][X]=p
@@ -52,10 +46,7 @@ class CKY:
                     #print "Setup prob ",0
 
     def startCKY(self):
-
-
         self.setup()
-
         print self.pi
         print self.s
         print self.N
@@ -67,10 +58,12 @@ class CKY:
                 b=self.checkIfRuleChangesAToWord(A,self.s[i])
                 if b>=0:
                     #print "Yes a rule from ",A," to ",self.s[i], ' probability ',b
-                    if i not in self.pi:
-                        self.pi[i]=dict()
-                    if i+1 not in self.pi[i]:
-                        self.pi[i][i+1]=dict()
+                    # if i not in self.pi:
+                    #     self.pi[i]=dict()
+                    # if i+1 not in self.pi[i]:
+                    #     self.pi[i][i+1]=dict()
+                    self.addIfNull(i,i+1,A)
+
                     self.pi[i][i+1][A]=b
                 else:
                     #print "No a rule from ",A," to ",self.s[i]
@@ -80,10 +73,17 @@ class CKY:
                         self.pi[i][i+1]=dict()
 
                     self.pi[i][i+1][A]=0
-            self.handleUnaries(i)
+            self.handleUnaries(i,i+1)
         print self.pi
         print self.bp
         self.startCKYRec()
+
+        print "Results"
+        print self.pi
+        print self.s
+        print self.N
+        print self.bp
+
 
 
     def startCKYRec(self):
@@ -94,12 +94,8 @@ class CKY:
                     for A in self.nonTerminals:
                         for B in self.nonTerminals:
                             for C in self.nonTerminals:
-                                #print "OLA"
-                                #print begin
-                                #print split
-                                #print end
-                                prob = self.pi[begin][split][B]*self.pi[split][end][C]*self.AGoesToBCInGrammar(A,B,C)
-
+                                prob = self.pi[begin][split][B]*self.pi[split][end-1][C]*self.AGoesToBCInGrammar(A,B,C)
+                                self.addIfNull(begin,end,A)
                                 if prob > self.pi[begin][end][A]:
                                     self.pi[begin][end][A]=prob
                                     if begin not in self.bp:
@@ -107,6 +103,7 @@ class CKY:
                                     if end not in self.bp[begin]:
                                         self.bp[begin][end]=dict()
                                     self.bp[begin][end][A]=(split,B,C)
+                self.handleUnaries(begin,end)
 
 
 
@@ -130,9 +127,16 @@ class CKY:
                     return list[-1]
         return -1
 
+    def addIfNull(self,i,j,B):
+        if i not in self.pi:
+            self.pi[i]=dict()
+        if j not in self.pi[i]:
+            self.pi[i][j]=dict()
+        if B not in self.pi[i][j]:
+            self.pi[i][j][B]=0
 
-    #works correctly
-    def handleUnaries(self,i):
+    #works correctly, i=start and j=end
+    def handleUnaries(self,i,j):
         added=True
         while added==True:
             added=False
@@ -140,16 +144,17 @@ class CKY:
                 for B in self.nonTerminals:
                     #print "WOW!! ",A,B,"\n"
                     p=self.AGoesToBInGrammar(A,B)
-                    if self.pi[i][i+1][B]>0 and p>=0:
+                    self.addIfNull(i,j,B)
+                    if self.pi[i][j][B]>=0 and p>=0:
                         #print "Lol"
-                        prob = p*self.pi[i][i+1][B]
-                        if prob > self.pi[i][i+1][A]:
-                            self.pi[i][i+1][A] = prob
+                        prob = p*self.pi[i][j][B]
+                        if prob > self.pi[i][j][A]:
+                            self.pi[i][j][A] = prob
                             if i not in self.bp:
                                 self.bp[i]=dict()
-                            if i+1 not in self.bp[i]:
-                                self.bp[i][i+1]=dict()
-                            self.bp[i][i+1][A] =B
+                            if j not in self.bp[i]:
+                                self.bp[i][j]=dict()
+                            self.bp[i][j][A] =B
                             added = True
 
 
