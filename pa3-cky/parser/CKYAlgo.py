@@ -1,4 +1,4 @@
-import os
+from GrammarParser import GrammarParser
 
 
 class CKY:
@@ -7,13 +7,17 @@ class CKY:
         self.pi=None
         self.s=s1    #list of words in each line
         self.N=n1  #non terminal words
-        a, b, c = len(self.s)+1, len(self.s)+1, n1;
+        a, b, c = len(self.s)+1, len(self.s)+1, n1
         self.pi=dict(dict(dict()))
         self.bp=dict(dict(dict()))
         self.nonTerminals=nonTerms
         self.rules=dict()
         self.setRulesDict(rules)
+        self.grammarParser=GrammarParser('../grammar_rules.txt','../sents.txt')
         print self.rules   # a dictionary is created for all the rules for quicker access
+
+
+
 
 
     def setRulesDict(self,rules):
@@ -78,10 +82,16 @@ class CKY:
         print self.bp
         self.startCKYRec()
 
-        print "Results"
+
+
+        print "Results\n"
+
+        print "Pi is \n"
         print self.pi
+
         print self.s
         print self.N
+
         print self.bp
 
 
@@ -178,12 +188,12 @@ def main():
     nonTerms=['S','NP','VP','V@VP_V','V','PP','@VP_V','N','P']
 
 
-    rules=[['S','NP','VP',0.1],
+
+    rules=[['S','NP','VP',0.9],
            ['S','VP',0.1],
            ['VP','V','NP',0.5],
            ['VP','V',0.1],
            ['VP','V@VP_V',0.3],
-
            ['VP','V','PP',0.1],
            ['@VP_V','NP','PP',1.0],
            ['NP','NP','NP',0.1],
@@ -199,10 +209,16 @@ def main():
            ['V','tanks',0.3],
            ['P','with',1.0]]
 
+   # grammerParse= GramarParser('../grammar_rules.txt','../sents.txt')
+
 
 
     cky = CKY(s,5,nonTerms,rules)
-    #print cky.AGoesToBCInGrammar('VP','V','PP')
+
+
+    rules=cky.grammarParser.parseRulesFile()
+    sentences=cky.grammarParser.parseSentsFile()
+
     cky.startCKY()
 if __name__ == "__main__":
     main()
