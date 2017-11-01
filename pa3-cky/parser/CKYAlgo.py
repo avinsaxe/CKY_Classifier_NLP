@@ -71,7 +71,10 @@ class CKY:
                      print "\n"
 
                  if posEnd in self.pi[posStart]:
-                     print self.pi[posStart][posEnd]
+                     for key in self.pi[posStart][posEnd]:
+                        if self.pi_track[posStart][posEnd][key]!=None:
+                            print "P(",self.pi_track[posStart][posEnd][key],")=",
+                            print self.pi[posStart][posEnd][key]
 
 
     def startCKY(self):
