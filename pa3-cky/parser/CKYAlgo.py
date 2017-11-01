@@ -50,28 +50,28 @@ class CKY:
     def setup(self):
         for i in range(0,len(self.s)):
             for X in self.nonTerminals:
-                self.addIfNull(i,i,X)
-                p=self.AGoesToBInGrammar(X,self.s[i])
+                self.addIfNull(i,i+1,X)
+                p=self.AGoesToBInGrammarUnary(X,self.s[i])
                 if p>=0:
-                    self.pi[i][i][X]=p
+                    self.pi[i][i+1][X]=p
                     #print "Setup prob ",p
                 else:
-                    self.pi[i][i][X]=0
+                    self.pi[i][i+1][X]=0
                     #print "Setup prob ",0
 
     def printBeautiful(self):
         print "\nBeautifully Printing Results\n"
         print "\nSentence Under Consideration\n",self.s
 
+        print self.pi
         for k in range(0,len(self.s)):
-            for j in range(0,len(self.s)-1):
-                print "\n"
-                if j+k+1<=len(self.s):
-                    for k1 in range(j,j+k+1):
-                        print self.s[k1]," ",
-
-                    for key in self.pi[j][j+k]:
-                        print key," ",self.pi[j][j+k][key]
+             for j in range(0,len(self.s)-1):
+                 print "\n"
+                 if j+k+1<=len(self.s):
+                     print "Span:",
+                     for k1 in range(j,j+k+1):
+                         print self.s[k1]," ",
+                     print "\n"
 
 
         print self.pi
@@ -85,29 +85,29 @@ class CKY:
         #print the first diagonal
 
         for i in range(0,len(self.s)):
-            print i," , ",i," = ",self.pi[i][i]
+            print i," , ",i+1," = ",self.pi[i][i+1]
 
         for i in range(0,len(self.s)):
-            for A in self.nonTerminals:
-                #if A -> words[i] in grammar
-                b=self.checkIfRuleChangesAToWord(A,self.s[i])
-                if b!=-1:
-                    #print "Yes a rule from ",A," to ",self.s[i], ' probability ',b
-                    # if i not in self.pi:
-                    #     self.pi[i]=dict()
-                    # if i+1 not in self.pi[i]:
-                    #     self.pi[i][i+1]=dict()
-                    self.addIfNull(i,i+1,A)
-
-                    self.pi[i][i+1][A]=b
-                elif b==-1:
-                    #print "No a rule from ",A," to ",self.s[i]
-                    if i not in self.pi:
-                        self.pi[i]=dict()
-                    if i+1 not in self.pi[i]:
-                        self.pi[i][i+1]=dict()
-
-                    self.pi[i][i+1][A]=0
+            # for A in self.nonTerminals:
+            #     #if A -> words[i] in grammar
+            #     b=self.checkIfRuleChangesAToWord(A,self.s[i])
+            #     if b!=-1:
+            #         #print "Yes a rule from ",A," to ",self.s[i], ' probability ',b
+            #         # if i not in self.pi:
+            #         #     self.pi[i]=dict()
+            #         # if i+1 not in self.pi[i]:
+            #         #     self.pi[i][i+1]=dict()
+            #         self.addIfNull(i,i+1,A)
+            #
+            #         self.pi[i][i+1][A]=b
+            #     elif b==-1:
+            #         #print "No a rule from ",A," to ",self.s[i]
+            #         if i not in self.pi:
+            #             self.pi[i]=dict()
+            #         if i+1 not in self.pi[i]:
+            #             self.pi[i][i+1]=dict()
+            #
+            #         self.pi[i][i+1][A]=0
             self.handleUnaries(i,i+1)
         # print self.pi
         # print self.bp
@@ -133,7 +133,7 @@ class CKY:
         for span in range(2,len(self.s)):
             for begin in range(0,len(self.s)-span):
                 end=begin+span
-                for split in range(begin+1,end-1):
+                for split in range(begin+1,end):
                     for A in self.nonTerminals:
                         for B in self.nonTerminals:
                             for C in self.nonTerminals:
@@ -157,16 +157,8 @@ class CKY:
             for list in self.rules[A]:
                 #print list
                 #print "Searching for prob of transformation of A ",A," to B ",B," and C ",C," in list ",list
-                flag1=False
-                flag2=False
-                for B1 in list:
-                    if B1==B:
-                        flag1=True
-                    if B1==C:
-                        flag2=True
-
-                if flag1 and flag2:
-                    #print "Probability of transformation of ",A," to ",B," , ",C," is ",list[-1]
+                if (list[0]==B and list[1]==C) or (list[0]==C and list[1]==B):
+                    print "Probability of transformation of ",A," to ",B," , ",C," is ",list[-1]
                     return list[-1]
         return -1
 
@@ -186,7 +178,7 @@ class CKY:
             for A in self.nonTerminals:
                 for B in self.nonTerminals:
                     #print "WOW!! ",A,B,"\n"
-                    p=self.AGoesToBInGrammar(A,B)
+                    p=self.AGoesToBInGrammarUnary(A,B)
                     self.addIfNull(i,j,B)
                     if float(self.pi[i][j][B])>=0 and float(p)>=0:
                         # print "Lol \n",p
@@ -206,16 +198,29 @@ class CKY:
 
     #Works correctly
 
-    def AGoesToBInGrammar(self,A,B):
+    # def AGoesToBInGrammar(self,A,B):
+    #     if A in self.rules:
+    #         #print " A ",A
+    #         for list in self.rules[A]:
+    #             #print list
+    #             #print " B ",B
+    #             for B1 in list:
+    #                 if B1==B:
+    #                     #print "Yes ", A, " transforms to ",B," in grammar"
+    #                     return list[-1]
+    #     return -1
+
+    def AGoesToBInGrammarUnary(self,A,B):
         if A in self.rules:
             #print " A ",A
             for list in self.rules[A]:
                 #print list
                 #print " B ",B
-                for B1 in list:
-                    if B1==B:
-                        #print "Yes ", A, " transforms to ",B," in grammar"
-                        return list[-1]
+                if len(list)==2:
+                    for B1 in list:
+                        if B1==B:
+                            #print "Yes ", A, " transforms to ",B," in grammar"
+                            return list[-1]
         return -1
 
 
@@ -227,9 +232,9 @@ def main():
     cky = CKY(rulesFile,sentencesFile)
 
 
-    for i in range(0,len(cky.sentences)):
-        cky.s=cky.sentences[i]
-        cky.startCKY()
+    #for i in range(0,len(cky.sentences)):
+    cky.s=cky.sentences[0]
+    cky.startCKY()
 
 
 if __name__ == "__main__":
