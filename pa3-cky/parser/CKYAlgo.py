@@ -3,24 +3,33 @@ from GrammarParser import GrammarParser
 
 class CKY:
 
-    def __init__(self,s1,n1,nonTerms,rules):
-        self.pi=None
-        self.s=s1    #list of words in each line
-        self.N=n1  #non terminal words
-        a, b, c = len(self.s)+1, len(self.s)+1, n1
+    def __init__(self,rulesFile,sentenceFile):
+
+
+        self.grammarParser=GrammarParser(rulesFile,sentenceFile)
+
+        self.rulesList=self.grammarParser.parseRulesFile()
+        self.sentences=self.grammarParser.parseSentsFile()
+
+        self.rules=dict()
+        self.nonTerminals=self.grammarParser.nonTerminals
+
+        self.s=None    #list of words in each line
+        self.N=len(self.grammarParser.nonTerminals)  #non terminal words
         self.pi=dict(dict(dict()))
         self.bp=dict(dict(dict()))
-        self.nonTerminals=nonTerms
-        self.rules=dict()
-        self.setRulesDict(rules)
-        self.grammarParser=GrammarParser('../grammar_rules.txt','../sents.txt')
-        print self.rules   # a dictionary is created for all the rules for quicker access
+        self.setRulesDict(self.rulesList)
+        #print self.rules   # a dictionary is created for all the rules for quicker access
+
+
+
 
 
 
 
 
     def setRulesDict(self,rules):
+        #print "Setting up rules dictionary"
         for list in rules:
             if list!=None and len(list)>=3:
                 key=list[0]
@@ -37,6 +46,7 @@ class CKY:
                     return list[-1]
         return -1
 
+    #sets up diagonal of the matrix
     def setup(self):
         for i in range(0,len(self.s)):
             for X in self.nonTerminals:
@@ -49,18 +59,39 @@ class CKY:
                     self.pi[i][i][X]=0
                     #print "Setup prob ",0
 
+    def printBeautiful(self):
+        print "\nBeautifully Printing Results\n"
+        print "\nSentence Under Consideration\n",self.s
+
+        for k in range(0,len(self.s)):
+            for j in range(0,len(self.s)-1):
+                print "\n"
+                if j+k+1<=len(self.s):
+                    for k1 in range(j,j+k+1):
+                        print self.s[k1]," ",
+
+                    for key in self.pi[j][j+k]:
+                        print key," ",self.pi[j][j+k][key]
+
+
+        print self.pi
+
+
+
     def startCKY(self):
         self.setup()
-        print self.pi
-        print self.s
-        print self.N
-        print self.bp
+        #first diagonal is printing correctly
+        #print "Pi after setup"
+        #print the first diagonal
+
+        for i in range(0,len(self.s)):
+            print i," , ",i," = ",self.pi[i][i]
 
         for i in range(0,len(self.s)):
             for A in self.nonTerminals:
                 #if A -> words[i] in grammar
                 b=self.checkIfRuleChangesAToWord(A,self.s[i])
-                if b>=0:
+                if b!=-1:
                     #print "Yes a rule from ",A," to ",self.s[i], ' probability ',b
                     # if i not in self.pi:
                     #     self.pi[i]=dict()
@@ -69,7 +100,7 @@ class CKY:
                     self.addIfNull(i,i+1,A)
 
                     self.pi[i][i+1][A]=b
-                else:
+                elif b==-1:
                     #print "No a rule from ",A," to ",self.s[i]
                     if i not in self.pi:
                         self.pi[i]=dict()
@@ -78,21 +109,23 @@ class CKY:
 
                     self.pi[i][i+1][A]=0
             self.handleUnaries(i,i+1)
-        print self.pi
-        print self.bp
+        # print self.pi
+        # print self.bp
         self.startCKYRec()
 
 
 
-        print "Results\n"
+        # print "Results\n"
+        #
+        # print "Pi is \n"
+        # print self.pi
+        #
+        # print self.s
+        # print self.N
+        #
+        # print self.bp
 
-        print "Pi is \n"
-        print self.pi
-
-        print self.s
-        print self.N
-
-        print self.bp
+        self.printBeautiful()
 
 
 
@@ -104,7 +137,7 @@ class CKY:
                     for A in self.nonTerminals:
                         for B in self.nonTerminals:
                             for C in self.nonTerminals:
-                                prob = self.pi[begin][split][B]*self.pi[split][end][C]*self.AGoesToBCInGrammar(A,B,C)
+                                prob = float(self.pi[begin][split][B])*float(self.pi[split][end][C])*float(self.AGoesToBCInGrammar(A,B,C))
                                 self.addIfNull(begin,end,A)
                                 if prob > self.pi[begin][end][A]:
                                     self.pi[begin][end][A]=prob
@@ -143,7 +176,7 @@ class CKY:
         if j not in self.pi[i]:
             self.pi[i][j]=dict()
         if B not in self.pi[i][j]:
-            self.pi[i][j][B]=0
+            self.pi[i][j][B]=float(0.0)
 
     #works correctly, i=start and j=end
     def handleUnaries(self,i,j):
@@ -155,10 +188,13 @@ class CKY:
                     #print "WOW!! ",A,B,"\n"
                     p=self.AGoesToBInGrammar(A,B)
                     self.addIfNull(i,j,B)
-                    if self.pi[i][j][B]>=0 and p>=0:
-                        #print "Lol"
-                        prob = p*self.pi[i][j][B]
-                        if prob > self.pi[i][j][A]:
+                    if float(self.pi[i][j][B])>=0 and float(p)>=0:
+                        # print "Lol \n",p
+                        # print "Lol1 \n",self.pi[i][j]
+                        # print "B \n",B
+
+                        prob = float(p)*float(self.pi[i][j][B])
+                        if prob > float(self.pi[i][j][A]):
                             self.pi[i][j][A] = prob
                             if i not in self.bp:
                                 self.bp[i]=dict()
@@ -184,42 +220,18 @@ class CKY:
 
 
 def main():
-    s=['fish','people','fish','tanks']
-    nonTerms=['S','NP','VP','V@VP_V','V','PP','@VP_V','N','P']
+
+    rulesFile='../grammar_rules.txt'
+    sentencesFile='../sents.txt'
+
+    cky = CKY(rulesFile,sentencesFile)
 
 
-
-    rules=[['S','NP','VP',0.9],
-           ['S','VP',0.1],
-           ['VP','V','NP',0.5],
-           ['VP','V',0.1],
-           ['VP','V@VP_V',0.3],
-           ['VP','V','PP',0.1],
-           ['@VP_V','NP','PP',1.0],
-           ['NP','NP','NP',0.1],
-           ['NP','NP','PP',0.2],
-           ['NP','N',0.7],
-           ['PP','P','NP',1.0],
-           ['N','people',0.5],
-           ['N','fish',0.2],
-           ['N','tanks',0.2],
-           ['N','rods',0.1],
-           ['V','people',0.1],
-           ['V','fish',0.6],
-           ['V','tanks',0.3],
-           ['P','with',1.0]]
-
-   # grammerParse= GramarParser('../grammar_rules.txt','../sents.txt')
+    for i in range(0,len(cky.sentences)):
+        cky.s=cky.sentences[i]
+        cky.startCKY()
 
 
-
-    cky = CKY(s,5,nonTerms,rules)
-
-
-    rules=cky.grammarParser.parseRulesFile()
-    sentences=cky.grammarParser.parseSentsFile()
-
-    cky.startCKY()
 if __name__ == "__main__":
     main()
 
