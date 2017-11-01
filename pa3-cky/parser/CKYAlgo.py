@@ -59,6 +59,8 @@ class CKY:
     def printBeautiful(self):
         print "\nSentence Under Consideration\n",self.s
         print self.pi
+        print self.bp
+
         for k in range(0,len(self.s)):
              for j in range(0,len(self.s)):
                  print "\n"
@@ -74,7 +76,10 @@ class CKY:
                      for key in self.pi[posStart][posEnd]:
                         if self.pi_track[posStart][posEnd][key]!=None:
                             print "P(",self.pi_track[posStart][posEnd][key],")=",
-                            print self.pi[posStart][posEnd][key]
+                            print self.pi[posStart][posEnd][key],
+                            if key in self.bp[posStart][posEnd]:
+                                print "( BackPointer = (",self.bp[posStart][posEnd][key],"))"
+
 
 
     def startCKY(self):
