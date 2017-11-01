@@ -12,8 +12,6 @@ class GrammarParser:
         self.nonTerminals=set()
 
     def parseRulesFile(self):
-        print "Yes here"
-
         with open(self.rulesFile, "r") as ins:
             array = []
             for line in ins.readlines():
@@ -32,8 +30,6 @@ class GrammarParser:
 
 
     def parseSentsFile(self):
-        print "Yes here"
-
         with open(self.sentenceFile, "r") as ins:
             array = []
             for line in ins.readlines():

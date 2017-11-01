@@ -58,8 +58,6 @@ class CKY:
 
     def printBeautiful(self):
         print "\nSentence Under Consideration\n",self.s
-        print self.pi
-        print self.bp
 
         for k in range(0,len(self.s)):
              for j in range(0,len(self.s)):
@@ -180,9 +178,9 @@ def main():
     cky = CKY(rulesFile,sentencesFile)
 
 
-    #for i in range(0,len(cky.sentences)):
-    cky.s=cky.sentences[0]
-    cky.startCKY()
+    for i in range(0,len(cky.sentences)):
+        cky.s=cky.sentences[i]
+        cky.startCKY()
 
 
 if __name__ == "__main__":
