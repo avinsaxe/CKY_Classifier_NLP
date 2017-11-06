@@ -172,9 +172,6 @@ class CKY:
 
 
 def main():
-    print 'Number of arguments:', len(sys.argv), 'arguments.'
-    print 'Argument List:', str(sys.argv)
-
     if(len(sys.argv)>=3):
         rulesFile=sys.argv[-2]
         sentencesFile=sys.argv[-1]
