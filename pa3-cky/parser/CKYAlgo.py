@@ -1,4 +1,5 @@
 from GrammarParser import GrammarParser
+import sys
 
 
 class CKY:
@@ -171,9 +172,15 @@ class CKY:
 
 
 def main():
+    print 'Number of arguments:', len(sys.argv), 'arguments.'
+    print 'Argument List:', str(sys.argv)
 
-    rulesFile='../grammar_rules.txt'
-    sentencesFile='../sents.txt'
+    if(len(sys.argv)>=3):
+        rulesFile=sys.argv[-2]
+        sentencesFile=sys.argv[-1]
+    else:
+        rulesFile='../grammar_rules.txt'
+        sentencesFile='../sents.txt'
 
     cky = CKY(rulesFile,sentencesFile)
 
