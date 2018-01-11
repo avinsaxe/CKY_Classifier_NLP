@@ -16,7 +16,7 @@ pa3-cky/sents.txt
 The sents.txt file, contains all the input sentences. If you want to add new sentences or replace original, you can go ahead and put all the sentences in this file.
 The program will read sentences from this file alone.
 
-###### I have two python main code files.
+##### I have two python main code files.
 
 ###### 1. pa3-cky/sents.txt 
 ###### 2. pa3-cky/parser/GrammarParser.py
@@ -29,7 +29,7 @@ It also prints the results in the specified format on the terminal
 To run simply type the following command. It will take all the input files by default. 
 python CKYAlgo.py
 
-###### Analysis:
+##### Analysis:
 
 1. We use a dynamic programming approach, instead of greedy approach, and compute and store all possible useful states
 2. We compute all the possible states in parallel before finalizing a result.
@@ -38,5 +38,5 @@ python CKYAlgo.py
 5. I have used a dictionary based approach, for accessing all the relevant states of the dynamic programming approach in constant time. This has significantly improved the speed of computation
 6. I have used a dictionary of list approach for storing all the rules after parsing from the rules file. This also improves searching of a particular rule for a sentence.
 
-###### Limitations
+##### Limitations
 1. There is only one format in which input grammar rules and input sentences can be given. If the format of these rules and sentences is not correct, i.e. multiple sentences in one line, or grammar rules not ending with a \n character, then the program will fail 
