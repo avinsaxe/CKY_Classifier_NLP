@@ -3,6 +3,8 @@ Implemented my own 3 dimension, dynamic programming implementation of CKY Classi
 
 ### How to run the code:
 
+```python pa3-cky/CKYAlgorithm.py```
+
 ##### We have 2 input files
 
 ###### 1. pa3-cky/grammar_rules.txt* 
